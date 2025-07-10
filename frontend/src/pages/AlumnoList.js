@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AlumnoForm from './AlumnoForm';
+import FiltroAlumnos from './FiltroAlumnos';
+import AlumnoCard from './AlumnoCard';
 
 const datosFacultades = {
   "FACULTAD DE DERECHO Y CIENCIAS SOCIALES": [
@@ -59,70 +61,34 @@ function AlumnoList() {
     cargarAlumnos();
   }, []);
 
-  const alumnosFiltrados = alumnos.filter(a => {
-    return (
-      (!filtroFacultad || a.facultad === filtroFacultad) &&
-      (!filtroCarrera || a.carrera === filtroCarrera)
-    );
-  });
+  const alumnosFiltrados = alumnos.filter(a =>
+    (!filtroFacultad || a.facultad === filtroFacultad) &&
+    (!filtroCarrera || a.carrera === filtroCarrera)
+  );
 
   return (
-    <div>
+    <div className="container mt-4">
+      <h2 className="mb-4">Gestión de Alumnos</h2>
+
       <AlumnoForm
         onAlumnoAgregado={cargarAlumnos}
         alumnoSeleccionado={alumnoSeleccionado}
         limpiarSeleccion={limpiarSeleccion}
       />
 
-      <h3>Filtrar Alumnos</h3>
-      <div className="mb-3 d-flex gap-2">
-        <select
-          className="form-control"
-          value={filtroFacultad}
-          onChange={e => {
-            setFiltroFacultad(e.target.value);
-            setFiltroCarrera('');
-          }}
-        >
-          <option value="">Todas las Facultades</option>
-          {Object.keys(datosFacultades).map(f => (
-            <option key={f} value={f}>{f}</option>
-          ))}
-        </select>
+      <h4 className="mt-4">Filtrar Alumnos</h4>
+      <FiltroAlumnos
+        datosFacultades={datosFacultades}
+        filtroFacultad={filtroFacultad}
+        setFiltroFacultad={setFiltroFacultad}
+        filtroCarrera={filtroCarrera}
+        setFiltroCarrera={setFiltroCarrera}
+      />
 
-        {filtroFacultad && (
-          <select
-            className="form-control"
-            value={filtroCarrera}
-            onChange={e => setFiltroCarrera(e.target.value)}
-          >
-            <option value="">Todas las Carreras</option>
-            {datosFacultades[filtroFacultad].map(c => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        )}
-
-        <button className="btn btn-secondary" onClick={() => {
-          setFiltroFacultad('');
-          setFiltroCarrera('');
-        }}>Limpiar Filtros</button>
-      </div>
-
-      <h3>Listado de Alumnos</h3>
+      <h4 className="mt-4">Listado de Alumnos</h4>
       <ul className="list-group">
         {alumnosFiltrados.map(a => (
-          <li key={a.id} className="list-group-item d-flex justify-content-between align-items-center">
-            <span>
-              <strong>{a.nombre} {a.apellido}</strong> - DNI: {a.dni} <br />
-              <small>Facultad: {a.facultad || 'Sin asignar'}</small><br />
-              <small>Carrera: {a.carrera || 'Sin asignar'}</small>
-            </span>
-            <div>
-              <button className="btn btn-warning btn-sm me-2" onClick={() => editarAlumno(a)}>Editar</button>
-              <button className="btn btn-danger btn-sm" onClick={() => eliminarAlumno(a.id)}>Eliminar</button>
-            </div>
-          </li>
+          <AlumnoCard key={a.id} alumno={a} onEditar={editarAlumno} onEliminar={eliminarAlumno} />
         ))}
       </ul>
     </div>
@@ -130,6 +96,7 @@ function AlumnoList() {
 }
 
 export default AlumnoList;
+
 
 
 
