@@ -1,14 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const datosFacultades = {
+  "FACULTAD DE DERECHO Y CIENCIAS SOCIALES": [
+    "ABOGACÍA", "MARTILLERO PÚBLICO/NOTARIADO", "TECNICATURA UNIVERSITARIA EN HIGIENE Y SEGURIDAD EN EL TRABAJO"
+  ],
+  "FACULTAD DE CIENCIAS ECONOMICAS Y EMPRESARIALES": [
+    "CONTADOR PÚBLICO", "LICENCIATURA EN COMERCIO INTERNACIONAL", "ECONOMÍA", "COMERCIALIZACIÓN",
+    "ADMINISTRACIÓN DE EMPRESAS", "ADMINISTRACIÓN HOTELERA", "TECNICATURA UNIVERSITARIA CONTABLE",
+    "TECNICATURA EN COMERCIO EXTERIOR Y ADUANAS", "TECNICATURA EN COMERCIALIZACIÓN", "TECNICATURA EN ADMINISTRACIÓN HOTELERA",
+    "TÉCNICO UNIVERSITARIO EN ADMINISTRACIÓN DE EMPRESAS", "TECNICATURA UNIVERSITARIA EN DESARROLLO DE SOFTWARE"
+  ],
+  "FACULTAD DE FILOSOFÍA Y HUMANIDADES": [
+    "LICENCIATURA EN PSICOLOGÍA", "RECURSOS HUMANOS", "TECNICATURA EN ACOMPAÑAMIENTO TERAPÉUTICO", "TECNICATURA EN SECRETARIADO EJECUTIVO"
+  ],
+  "FACULTAD DE CIENCIAS MÉDICAS": [
+    "MEDICINA", "LICENCIATURA EN ENFERMERÍA", "KINESIOLOGÍA Y FISIOTERAPIA", "NUTRICIÓN",
+    "TECNICATURA EN ANÁLISIS CLÍNICOS", "TECNICATURA EN HEMOTERAPIA", "ASISTENTE DENTAL", "ENFERMERO UNIVERSITARIO"
+  ],
+  "FACULTAD DE CIENCIAS DE LA ALIMENTACIÓN, BIOQUÍMICAS Y FARMACÉUTICAS": [
+    "LICENCIATURA EN TECNOLOGÍA DE LOS ALIMENTOS", "ENOLOGÍA", "BROMATÓLOGO Y FARMACIA", "TECNICATURA EN GESTIÓN GASTRONÓMICA", "SOMMELIER"
+  ],
+  "FACULTAD DE EDUCACIÓN": [
+    "LICENCIATURA EN PSICOPEDAGOGÍA Y PSICOMOTRICIDAD", "PROFESORADO", "TECNICATURA EN POLÍTICAS DEPORTIVAS", "TECNICATURA EN GUÍA DE MONTAÑA"
+  ]
+};
+
 function AlumnoForm({ onAlumnoAgregado, alumnoSeleccionado, limpiarSeleccion }) {
   const [form, setForm] = useState({
     nombre: '',
     apellido: '',
     dni: '',
     fecha_nacimiento: '',
-    carrera_id: 1
   });
+
+  const [facultadSeleccionada, setFacultadSeleccionada] = useState('');
+  const [carreraSeleccionada, setCarreraSeleccionada] = useState('');
 
   useEffect(() => {
     if (alumnoSeleccionado) {
@@ -18,16 +45,18 @@ function AlumnoForm({ onAlumnoAgregado, alumnoSeleccionado, limpiarSeleccion }) 
         apellido: alumnoSeleccionado.apellido,
         dni: alumnoSeleccionado.dni,
         fecha_nacimiento: fechaFormateada,
-        carrera_id: alumnoSeleccionado.carrera_id || 1
       });
+      setFacultadSeleccionada(alumnoSeleccionado.facultad || '');
+      setCarreraSeleccionada(alumnoSeleccionado.carrera || '');
     } else {
       setForm({
         nombre: '',
         apellido: '',
         dni: '',
         fecha_nacimiento: '',
-        carrera_id: 1
       });
+      setFacultadSeleccionada('');
+      setCarreraSeleccionada('');
     }
   }, [alumnoSeleccionado]);
 
@@ -41,8 +70,14 @@ function AlumnoForm({ onAlumnoAgregado, alumnoSeleccionado, limpiarSeleccion }) 
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const datosEnviar = {
+      ...form,
+      facultad: facultadSeleccionada,
+      carrera: carreraSeleccionada
+    };
+
     if (alumnoSeleccionado) {
-      axios.put(`http://localhost:3001/api/alumnos/${alumnoSeleccionado.id}`, form)
+      axios.put(`http://localhost:3001/api/alumnos/${alumnoSeleccionado.id}`, datosEnviar)
         .then(() => {
           alert("Alumno actualizado");
           onAlumnoAgregado();
@@ -50,7 +85,7 @@ function AlumnoForm({ onAlumnoAgregado, alumnoSeleccionado, limpiarSeleccion }) 
         })
         .catch(err => console.error(err));
     } else {
-      axios.post('http://localhost:3001/api/alumnos', form)
+      axios.post('http://localhost:3001/api/alumnos', datosEnviar)
         .then(() => {
           alert("Alumno agregado");
           onAlumnoAgregado();
@@ -59,8 +94,9 @@ function AlumnoForm({ onAlumnoAgregado, alumnoSeleccionado, limpiarSeleccion }) 
             apellido: '',
             dni: '',
             fecha_nacimiento: '',
-            carrera_id: 1
           });
+          setFacultadSeleccionada('');
+          setCarreraSeleccionada('');
         })
         .catch(err => console.error(err));
     }
@@ -82,9 +118,31 @@ function AlumnoForm({ onAlumnoAgregado, alumnoSeleccionado, limpiarSeleccion }) 
       <div className="mb-2">
         <input type="date" className="form-control" name="fecha_nacimiento" value={form.fecha_nacimiento} onChange={handleChange} required />
       </div>
+
       <div className="mb-2">
-        <input type="number" className="form-control" name="carrera_id" value={form.carrera_id} onChange={handleChange} placeholder="ID de carrera" />
+        <label>Facultad</label>
+        <select className="form-control" value={facultadSeleccionada} onChange={(e) => {
+          setFacultadSeleccionada(e.target.value);
+          setCarreraSeleccionada('');
+        }} required>
+          <option value="">Seleccionar Facultad</option>
+          {Object.keys(datosFacultades).map(facultad => (
+            <option key={facultad} value={facultad}>{facultad}</option>
+          ))}
+        </select>
       </div>
+
+      {facultadSeleccionada && (
+        <div className="mb-2">
+          <label>Carrera</label>
+          <select className="form-control" value={carreraSeleccionada} onChange={(e) => setCarreraSeleccionada(e.target.value)} required>
+            <option value="">Seleccionar Carrera</option>
+            {datosFacultades[facultadSeleccionada].map(carrera => (
+              <option key={carrera} value={carrera}>{carrera}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <button className="btn btn-success me-2">{alumnoSeleccionado ? "Actualizar" : "Guardar"}</button>
       {alumnoSeleccionado && (
@@ -95,6 +153,8 @@ function AlumnoForm({ onAlumnoAgregado, alumnoSeleccionado, limpiarSeleccion }) 
 }
 
 export default AlumnoForm;
+
+
 
 
 

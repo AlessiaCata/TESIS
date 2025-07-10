@@ -1,15 +1,20 @@
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./students.db');
+const mysql = require('mysql2');
 
-db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS alumnos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT,
-        apellido TEXT,
-        dni TEXT,
-        fecha_nacimiento TEXT,
-        carrera_id INTEGER
-    )`);
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'admin',
+  password: 'admin123',
+  database: 'gestion_alumnos'
+});
+
+db.connect((err) => {
+  if (err) {
+    console.error('❌ Error al conectar a MariaDB:', err.message);
+  } else {
+    console.log('✅ Conectado a la base de datos MariaDB.');
+  }
 });
 
 module.exports = db;
+
+
