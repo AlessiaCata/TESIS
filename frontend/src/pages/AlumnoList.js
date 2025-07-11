@@ -3,6 +3,8 @@ import axios from 'axios';
 import AlumnoForm from './AlumnoForm';
 import FiltroAlumnos from './FiltroAlumnos';
 import AlumnoCard from './AlumnoCard';
+import '../Styles/AlumnoList.css';
+
 
 const datosFacultades = {
   "FACULTAD DE DERECHO Y CIENCIAS SOCIALES": [

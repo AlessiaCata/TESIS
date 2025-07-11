@@ -1,11 +1,11 @@
 // src/pages/FiltroAlumnos.js
 import React from 'react';
+import '../Styles/FiltroAlumnos.css';
 
 function FiltroAlumnos({ datosFacultades, filtroFacultad, setFiltroFacultad, filtroCarrera, setFiltroCarrera }) {
   return (
-    <div className="mb-4 d-flex flex-wrap gap-2">
+    <div className="filtro-container">
       <select
-        className="form-control"
         value={filtroFacultad}
         onChange={(e) => {
           setFiltroFacultad(e.target.value);
@@ -20,7 +20,6 @@ function FiltroAlumnos({ datosFacultades, filtroFacultad, setFiltroFacultad, fil
 
       {filtroFacultad && (
         <select
-          className="form-control"
           value={filtroCarrera}
           onChange={(e) => setFiltroCarrera(e.target.value)}
         >
@@ -32,7 +31,6 @@ function FiltroAlumnos({ datosFacultades, filtroFacultad, setFiltroFacultad, fil
       )}
 
       <button
-        className="btn btn-secondary"
         onClick={() => {
           setFiltroFacultad('');
           setFiltroCarrera('');
